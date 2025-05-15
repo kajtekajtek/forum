@@ -2,6 +2,7 @@
 import "./globals.css";
 import 'bootstrap/dist/css/bootstrap.min.css'
 import UserProvider from "./context/UserContext"
+import Navigation from "./components/Navigation";
 
 export const metadata = {
     title: 'forum',
@@ -12,7 +13,8 @@ export default function RootLayout({ children }) {
         <html lang="en">
             <body>
                 <UserProvider>
-                    {children}
+                    <Navigation/>
+                    <main> {children} </main>
                 </UserProvider>
             </body>
         </html>

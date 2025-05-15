@@ -6,18 +6,45 @@ import bcrypt from "bcryptjs";
 import { useRouter } from "next/navigation";
 
 const UserContext = createContext(null);
-
 export const useUser = () => useContext(UserContext);
+
+// cookie utilities
+function setTokenCookie(token) {
+    document.cookie = `token=${token}; path=/`;
+}
+
+function getTokenFromCookie() {
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie.match(/(^| )token=([^;]+)/);
+    return match ? match[2] : null;
+}
+
+function removeTokenCookie() {
+    if (typeof document === 'undefined') return;
+    document.cookie = 'token=; Max-Age=0; path=/';
+}
 
 export default function userProvider({ children }) {
     const router = useRouter();
     const [loggedInUser, setLoggedInUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
+    // read token from cookie and set user on mount
     useEffect(() => {
-        const loggedInUser = JSON.parse(localStorage.getItem("user"));
-        setLoggedInUser(loggedInUser || null);
+        const token = getTokenFromCookie();
+        if (token) {
+            try {
+                const user = JSON.parse(atob(token));
+                setLoggedInUser(user);
+            } catch (e) {
+                console.error("Invalid token cookie", e);
+                removeTokenCookie();
+            }
+        }
+        setLoading(false);
     }, []);
 
+    // validate, set cookie, context and redirect (mock)
     const login = (email, password) => {
         const users = JSON.parse(localStorage.getItem("users")) || [];
 
@@ -31,22 +58,25 @@ export default function userProvider({ children }) {
             return false;
         }
 
-        setLoggedInUser(user);
-        localStorage.setItem("user", JSON.stringify(user));
+        const token = btoa(JSON.stringify({ username: user.username }));
+        setTokenCookie(token);
+        setLoggedInUser({ username: user.username });
+        router.replace("/");
         return true;
     }
 
+    // clear cookie, context and redirect (mock)
     const logout = () => {
+        removeTokenCookie();
         setLoggedInUser(null);
-        localStorage.removeItem("user");
-        router.push("/login");
+        router.replace("/login");
     }
 
+    // store user in localStorage (mock)
     const register = (username, email, password) => {
         const users = JSON.parse(localStorage.getItem("users")) || [];
 
-        const userExists = users.some((user) => user.email === email);
-        if (userExists) {
+        if (users.some((user) => user.email === email)) {
             return false;
         }
 
@@ -58,13 +88,14 @@ export default function userProvider({ children }) {
             password: passwordHash,
             servers: []
         });
+
         localStorage.setItem("users", JSON.stringify(users));
         return true;
     }
 
     return (
         <UserContext.Provider value={{
-            loggedInUser, login, logout, register
+            loggedInUser, loading, login, logout, register
         }}>
             {children}
         </UserContext.Provider>

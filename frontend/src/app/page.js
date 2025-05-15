@@ -1,13 +1,7 @@
+// app/page.js - / page
 "use client";
-import useAuth from "./hooks/useAuth";
-import { useUser } from "./context/UserContext";
+import HomePage from "./components/HomePage";
 
-export default function Home() {
-    useAuth();
-
-    const { loggedInUser } =  useUser();
-
-    return (
-        <h1>Hello, {loggedInUser.name}!</h1> 
-    );
+export default function Root() {
+    return <HomePage />;
 }
