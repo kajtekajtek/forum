@@ -32,7 +32,6 @@ export default function Login() {
             return;
         }
 
-        alert("Logged in successfully");
         router.push("/");
     }
 

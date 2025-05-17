@@ -1,0 +1,66 @@
+body {
+    background-color: var(--background-color-dark)!important;
+    color: var(--text-color-light)!important;
+
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+main {
+    padding-bottom: 100px;
+}
+
+/* button styles */
+.btn {
+    border-radius: 5px!important;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25)!important;
+    color: var(--text-color-light)!important;
+}
+
+.btn:hover {
+    filter: brightness(105%)!important;
+    transform: scale(1.01);
+}
+
+.btn-primary {
+    background-color: var(--background-color-light)!important;
+    border-color: var(--background-color-light)!important;
+}
+
+.btn-primary-outline {
+    background-color: var(--background-color-dark)!important;
+    border-color: var(--background-color-light)!important;
+    color: var(--background-color-light)!important;
+}
+
+.btn-danger {
+    background-color: var(--danger-color)!important;
+    border-color: var(--danger-color)!important;
+}
+
+/* text */
+.text-primary {
+    color: var(--background-color-light)!important;
+}
+
+.text-primary svg {
+    color: var(--background-color-light)!important;
+}
+
+/* card and forms */
+.card {
+    background-color: var(--background-color-dark)!important;
+    border-color: var(--background-color-light)!important;
+    color: var(--text-color-light)!important;
+}
+
+.form-control {
+    background-color: var(--background-color-light)!important;
+    color: var(--text-color-light)!important;
+    border-color: var(--background-color-light)!important;
+}
+
+.form-select {
+    background-color: var(--background-color-dark)!important;
+}

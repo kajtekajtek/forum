@@ -1,5 +1,6 @@
 // src/app/layout.js - global layout
-import "./globals.css";
+import "../../styles/global.css";
+import "../../styles/variables.css";
 import 'bootstrap/dist/css/bootstrap.min.css'
 import UserProvider from "./context/UserContext"
 import Navigation from "./components/Navigation";
@@ -13,8 +14,10 @@ export default function RootLayout({ children }) {
         <html lang="en">
             <body>
                 <UserProvider>
-                    <Navigation/>
-                    <main> {children} </main>
+                    <div className="d-flex flex-column vh-100">
+                        <Navigation/>
+                        <main> {children} </main>
+                    </div>
                 </UserProvider>
             </body>
         </html>
