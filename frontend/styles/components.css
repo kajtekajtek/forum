@@ -1,0 +1,13 @@
+/* navigation */
+nav .container-fluid {
+  background-color: var(--background-color)!important;
+  border-color: var(--background-color)!important;
+}
+
+nav {
+  background-color: var(--background-color)!important;
+  border-color: var(--background-color)!important;
+}
+.navbar-nav {
+  align-items: center!important;
+}

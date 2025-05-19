@@ -1,0 +1,8 @@
+:root {
+    --background-color-light: #372248;
+    --background-color-dark: #171123;
+    --text-color-light: #f3eff5;
+    --text-color-dark: #E1D7EA;
+    --danger-color: #ff6542;
+    --bs-danger-rgb: 255, 101, 66!important;
+}

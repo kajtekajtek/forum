@@ -1,5 +1,7 @@
-export default function Home() {
-  return (
-    <h1>Hello World!</h1> 
-  );
+// app/page.js - / page
+"use client";
+import HomePage from "./components/HomePage";
+
+export default function Root() {
+    return <HomePage />;
 }
