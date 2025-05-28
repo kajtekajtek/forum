@@ -2,11 +2,10 @@
 "use client";
 
 import React from "react";
-import { useUser } from "../context/UserContext";
-import Link from "next/link";
+import { useKeycloak } from '../context/KeycloakContext';
 
 export default function Navigation() {
-    const { loggedInUser, logout } = useUser();
+    const { redirectToLogout, authenticated  } = useKeycloak();
 
     return (
         <div className="navbar-nav-expand-lg">
@@ -14,18 +13,14 @@ export default function Navigation() {
                 <div className="navbar-nav ms-auto">
                     {/* if user is logged in, show logout button,
                         else show login and register buttons */}
-                    {loggedInUser ? (
-                        <button className="btn btn-primary" onClick={logout}>
+                    {authenticated ? (
+                        <button className="btn btn-primary" 
+                                onClick={redirectToLogout}>
                             Logout
                         </button>
                     ) : (
                         <>
-                            <Link href="/login">
-                                <button className="btn btn-primary me-2">Login</button>
-                            </Link>
-                            <Link href="/register">
-                                <button className="btn btn-primary">Register</button>
-                            </Link>
+                            {/* TODO: login & register buttons */}
                         </>
                     )}
                 </div>
