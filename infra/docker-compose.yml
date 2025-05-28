@@ -6,13 +6,29 @@ services:
     container_name: forum_postgres
     restart: always
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-forum_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-forum_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-forum_db}
     volumes:
       - ${POSTGRES_VOLUME}:/var/lib/postgresql/data
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.4
+    container_name: forum_keycloak
+    command: start-dev
+    ports:
+      - "${KEYCLOAK_PORT:-8080}:8080"
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - ./keycloak/start.sh:/opt/keycloak/start.sh
+    entrypoint: ["/opt/keycloak/start.sh"]
+
 volumes:
   forum_pgdata:
+  keycloak_data:
