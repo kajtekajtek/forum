@@ -1,11 +1,17 @@
-// app/components/Home.js - Home page component
+// app/components/HomePage.js - Home page component
 import React from "react";
-import { useUser } from "../context/UserContext";
+import { useKeycloak } from "../context/KeycloakContext";
 
 export default function Home() {
-    const { loggedInUser } = useUser();
+    const { authenticated, userInfo } = useKeycloak();
+    
+    if (!authenticated) {
+        return (
+            <h1>welcome to forum.</h1> 
+        )
+    }
 
     return (
-        <h1>Hello, {loggedInUser?.username}</h1> 
+        <h1>hello, {userInfo?.preferred_username}!</h1> 
     );
 };
