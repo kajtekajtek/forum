@@ -1,6 +1,7 @@
 {
   "realm": "forum",
   "enabled": true,
+  "registrationAllowed": true,
   "clients": [
     {
       "clientId": "frontend-app",

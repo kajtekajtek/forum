@@ -24,11 +24,11 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
     volumes:
-      - keycloak_data:/opt/keycloak/data
+      - forum_keycloak_data:/opt/keycloak/data
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
       - ./keycloak/start.sh:/opt/keycloak/start.sh
     entrypoint: ["/opt/keycloak/start.sh"]
 
 volumes:
-  forum_pgdata:
-  keycloak_data:
+  forum_postgres_data:
+  forum_keycloak_data:
