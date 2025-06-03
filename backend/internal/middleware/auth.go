@@ -9,17 +9,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/coreos/go-oidc"
 	"golang.org/x/oauth2"
+
+	"github.com/kajtekajtek/forum/backend/internal/config"
 )
 
-func KeycloakAuthMiddleware(url string, realm string, clientID string) gin.HandlerFunc {
-	issuer := fmt.Sprintf("%s/realms/%s", url, realm)
+func KeycloakAuthMiddleware(c *config.Config) gin.HandlerFunc {
+	issuer := fmt.Sprintf("%s/realms/%s", c.KeycloakURL, c.KeycloakRealm)
 
 	provider, err := oidc.NewProvider(context.Background(), issuer)
 	if err != nil {
 		panic(fmt.Sprintf("get provider: %v", err))
 	}
 
-	verifier := provider.Verifier(&oidc.Config{ClientID: clientID})
+	verifier := provider.Verifier(&oidc.Config{ClientID: c.KeycloakClientID})
 
 	return func(c *gin.Context) {
 		// retrieve and verify token
