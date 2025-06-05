@@ -77,7 +77,7 @@ func KeycloakAuthMiddleware(cfg *config.Config) gin.HandlerFunc {
 
 		// set user's ID and Realm roles in the Gin context
 		c.Set("userID", claims.Sub)
-		c.Set("roles", claims.RealmAccess.Roles)
+		c.Set("userRealmRoles", claims.RealmAccess.Roles)
 
 		c.Next()
 	}
