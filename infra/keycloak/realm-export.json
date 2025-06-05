@@ -1,66 +1,82 @@
 {
-  "realm": "forum",
-  "enabled": true,
-  "registrationAllowed": true,
-  "clients": [
-    {
-      "clientId": "frontend-app",
-      "publicClient": true,
-      "redirectUris": ["http://localhost:3000/*"],
-      "webOrigins": ["+"],
-      "protocol": "openid-connect",
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
-      "attributes": {
-        "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "+"
-      }
-    }
-  ],
-  "roles": {
-    "realm": [
-      { "name": "admin" },
-      { "name": "moderator" },
-      { "name": "user" }
+    "realm": "forum",
+    "enabled": true,
+    "registrationAllowed": true,
+    "clients": [
+        {
+            "clientId": "frontend-app",
+            "publicClient": true,
+            "redirectUris": ["http://localhost:3000/*"],
+            "webOrigins": ["+"],
+            "protocol": "openid-connect",
+            "standardFlowEnabled": true,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": true,
+            "attributes": {
+                "pkce.code.challenge.method": "S256",
+                "post.logout.redirect.uris": "+"
+            },
+            "protocolMappers": [
+                {          
+                    "name": "aud-frontend-app",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "consentRequired": false,
+                    "consentText": "",
+                    "config": {
+                        "included.client.audience": "frontend-app",
+                        "id.token.claim": "true",
+                        "access.token.claim": "true",
+                        "claim.name": "aud",
+                        "jsonType.label": "String"
+                    }
+                }
+            ]
+        }
+    ],
+    "roles": {
+        "realm": [
+            { "name": "admin" },
+            { "name": "moderator" },
+            { "name": "user" }
+        ]
+    },
+    "users": [
+        {
+            "username": "admin",
+            "enabled": true,
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "admin",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": ["admin"]
+        },
+        {
+            "username": "moderator",
+            "enabled": true,
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "moderator",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": ["moderator"]
+        },
+        {
+            "username": "user",
+            "enabled": true,
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "user",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": ["user"]
+        }
     ]
-  },
-  "users": [
-    {
-      "username": "admin",
-      "enabled": true,
-      "credentials": [
-        {
-          "type": "password",
-          "value": "admin",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["admin"]
-    },
-    {
-      "username": "moderator",
-      "enabled": true,
-      "credentials": [
-        {
-          "type": "password",
-          "value": "moderator",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["moderator"]
-    },
-    {
-      "username": "user",
-      "enabled": true,
-      "credentials": [
-        {
-          "type": "password",
-          "value": "user",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["user"]
-    }
-  ]
 }
