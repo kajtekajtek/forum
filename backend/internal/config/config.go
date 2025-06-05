@@ -18,7 +18,8 @@ type Config struct {
 	DBName		string
 
 	// keycloak variables
-	KeycloakURL			string
+	KeycloakHost		string
+	KeycloakPort		string
 	KeycloakRealm		string
 	KeycloakClientID	string
 }
@@ -39,9 +40,10 @@ func Load() (*Config, error) {
 	c.DBPassword 	= os.Getenv("DB_PASSWORD")
 	c.DBName 		= os.Getenv("DB_NAME")
 
-	c.KeycloakURL		= os.Getenv("KEYCLOAK_URL")
+	c.KeycloakHost		= os.Getenv("KEYCLOAK_HOST")
+	c.KeycloakPort		= os.Getenv("KEYCLOAK_PORT")
 	c.KeycloakRealm		= os.Getenv("KEYCLOAK_REALM")
-	c.KeycloakClientID	= os.Getenv("KEYCLOAK_REALM")
+	c.KeycloakClientID	= os.Getenv("KEYCLOAK_CLIENT_ID")
 
 	return &c, nil
 }

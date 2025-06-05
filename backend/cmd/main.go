@@ -28,4 +28,6 @@ func main() {
         servers.POST("", handlers.CreateServerHandler(db))
         servers.GET("", handlers.GetServerListHandler(db))
 	}
+
+	router.Run(":" + config.Port)
 }

@@ -78,7 +78,7 @@ func GetServerListHandler(db *gorm.DB) gin.HandlerFunc {
 		var memberships []models.Membership
 		err := db.Where("user_id = ?", userID).Find(&memberships).Error
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
+			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "failed to query user's memberships"})
 			return
 		}
@@ -94,7 +94,7 @@ func GetServerListHandler(db *gorm.DB) gin.HandlerFunc {
 		if len(serverIDs) > 0 {
 			err := db.Where("id IN ?", serverIDs).Find(&servers).Error
 			if err != nil {
-				c.JSON(http.StatusUnauthorized, gin.H{
+				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": "failed to query servers"})
 				return
 			}

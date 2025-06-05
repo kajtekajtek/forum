@@ -2,38 +2,37 @@
 
 import React from 'react';
 import { useKeycloak } from '../context/KeycloakContext';
-import { createServer } from '../lib/api/apiClient';
+import { useUser } from '../context/UserContext';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
-export default function CreateServerForm({ onCreated }) {
+export default function CreateServerForm() {
     const { keycloak, authenticated } = useKeycloak();
+    const { createServer, isCreating, createError } = useUser();
 
-    const servNameMinLen = 3;
-    const servNameMaxLen = 20;
+    const servNameMin= 3;
+    const servNameMax= 20;
 
     const createServerSchema = Yup.object().shape({
         name: Yup.string()
             .trim()
             .required('Server name is required')
-            .min(servNameMinLen, `Server name has to be at least ${servNameMinLen} characters long`)
-            .max(servNameMaxLen, `Server name can't be longer than ${servNameMaxLen} characters`),
+            .min(servNameMin, 
+                `Server name has to be at least ${servNameMin} characters long`)
+            .max(servNameMax, 
+                `Server name can't be longer than ${servNameMax} characters`),
     });
 
-    const handleSubmit = async (values, { setSubmitting, resetForm, setStatus }) => {
+    const onSubmit = async (values, { setSubmitting, resetForm, setStatus }) => {
         setStatus(null);
 
-        try {
-            const token = keycloak.token;
-            const data = await createServer(token, values.name.trim());
+        const server = await createServer(values.name.trim());
+        if (server) {
             resetForm();
-            onCreated(data.server);
-        } catch (err) {
-            console.error(err);
-            setStatus('Could not create server');
-        } finally {
-            setSubmitting(false);
+        } else {
+            setStatus(createError || "Failed to create server")
         }
+        setSubmitting(false);
     };
 
     if (!authenticated) {
@@ -45,7 +44,7 @@ export default function CreateServerForm({ onCreated }) {
             <Formik
                 initialValues={{ name: '' }}
                 validationSchema={createServerSchema}
-                onSubmit={handleSubmit}
+                onSubmit={onSubmit}
             >
                 {({ isSubmitting, status }) => (
                     <Form>
