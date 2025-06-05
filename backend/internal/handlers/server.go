@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/kajtekajtek/forum/backend/internal/models"
+	"github.com/kajtekajtek/forum/backend/internal/database"
 	"gorm.io/gorm"
 )
 
@@ -70,29 +71,30 @@ func GetServerListHandler(db *gorm.DB) gin.HandlerFunc {
 				"error": err.Error()})
 			return
 		}
+
+		isAdminOrMod := false
+		for _, r := range user.RealmRoles {
+			if r == "admin" || r == "moderator" {
+				isAdminOrMod = true
+			}
+		}
 		
-		// query user's memberships from database
-		var memberships []models.Membership
-		err = db.Where("user_id = ?", user.ID).Find(&memberships).Error
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "failed to query user's memberships"})
-			return
-		}
-
-		// get server IDs from memberships
-		serverIDs := make([]uint, 0, len(memberships))
-		for _, m := range memberships {
-			serverIDs = append(serverIDs, m.ServerID)
-		}
-
-		// query servers with given IDs from database
 		var servers []models.Server
-		if len(serverIDs) > 0 {
-			err := db.Where("id IN ?", serverIDs).Find(&servers).Error
+
+		// if user has role admin or moderator, return all servers
+		if isAdminOrMod {
+			servers, err = database.QueryAllServers(db)	
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": "failed to query servers"})
+                    "error": "failed to query servers"})
+                return
+			}
+		// else, query servers by user ID
+		} else {
+			servers, err = database.QueryUserServers(db, user.ID)	
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+                    "error": "failed to query user servers"})
 				return
 			}
 		}
