@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  postgres:
+  forum_postgres:
     image: postgres:16-alpine
-    container_name: ${POSTGRES_CONTAINER}
+    container_name: forum_postgres_container
     restart: always
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
@@ -12,11 +12,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-forum_pass}
       POSTGRES_DB: ${POSTGRES_DB:-forum_db}
     volumes:
-      - forum_postgres_data:/var/lib/postgresql/data
+      - forum_postgres_volume:/var/lib/postgresql/data
 
-  keycloak:
+  forum_keycloak:
     image: quay.io/keycloak/keycloak:23.0.4
-    container_name: ${KEYCLOAK_CONTAINER}
+    container_name: forum_keycloak_container
     command: start-dev
     ports:
       - "${KEYCLOAK_PORT:-5000}:8080"
@@ -24,11 +24,11 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
     volumes:
-      - forum_keycloak_data:/opt/keycloak/data
+      - forum_keycloak_volume:/opt/keycloak/data
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
       - ./keycloak/start.sh:/opt/keycloak/start.sh
     entrypoint: ["/opt/keycloak/start.sh"]
 
 volumes:
-  forum_postgres_data:
-  forum_keycloak_data:
+  forum_postgres_volume:
+  forum_keycloak_volume:

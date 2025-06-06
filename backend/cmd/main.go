@@ -29,5 +29,5 @@ func main() {
         servers.GET("", handlers.GetServerListHandler(db))
 	}
 
-	router.Run(":" + config.Port)
+	router.Run(":" + config.APIPort)
 }
