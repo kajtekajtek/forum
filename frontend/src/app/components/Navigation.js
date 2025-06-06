@@ -1,6 +1,4 @@
 // app/components/Navigation.js - navigation component
-"use client";
-
 import React from "react";
 import AuthButtons from '../components/AuthButtons';
 
