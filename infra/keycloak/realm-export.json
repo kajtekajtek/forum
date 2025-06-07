@@ -1,10 +1,10 @@
 {
-    "realm": "forum",
+    "realm": "${KEYCLOAK_REALM:-forum}",
     "enabled": true,
     "registrationAllowed": true,
     "clients": [
         {
-            "clientId": "frontend-app",
+            "clientId": "${KEYCLOAK_CLIENT_ID:-frontend-app}",
             "publicClient": true,
             "redirectUris": ["http://localhost:3000/*"],
             "webOrigins": ["+"],
@@ -18,13 +18,13 @@
             },
             "protocolMappers": [
                 {          
-                    "name": "aud-frontend-app",
+                    "name": "aud-mapper",
                     "protocol": "openid-connect",
                     "protocolMapper": "oidc-audience-mapper",
                     "consentRequired": false,
                     "consentText": "",
                     "config": {
-                        "included.client.audience": "frontend-app",
+                        "included.client.audience": "${KEYCLOAK_CLIENT_ID:-frontend-app}",
                         "id.token.claim": "true",
                         "access.token.claim": "true",
                         "claim.name": "aud",
