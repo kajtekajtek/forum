@@ -1,0 +1,7 @@
+/bin/
+/obj/
+/vendor/
+/tmp/
+/*.log
+.DS_STORE
+.env

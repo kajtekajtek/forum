@@ -29,10 +29,10 @@ func Load() (*Config, error) {
 
 	err := godotenv.Load("../.env")
 	if err != nil {
-		return &Config{}, fmt.Errorf("load .env: %w", err)
+		fmt.Println("warning: ../.env not found.")
 	}
 
-	c.APIPort	= os.Getenv("API_PORT")
+	c.APIPort = os.Getenv("API_PORT")
 
 	c.PostgresHost 		= os.Getenv("POSTGRES_HOST")
 	c.PostgresPort 		= os.Getenv("POSTGRES_PORT")
