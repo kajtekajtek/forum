@@ -65,6 +65,8 @@ services:
       API_HOST: "0.0.0.0"
       API_PORT: "${API_PORT:-8080}"
 
+      CORS_ORIGINS: "${CORS_ORIGINS:-*}"
+
       POSTGRES_HOST: "forum_postgres"
       POSTGRES_PORT: "${POSTGRES_PORT:-5432}"
       POSTGRES_USER: "${POSTGRES_USER:-forum_user}"
@@ -73,6 +75,7 @@ services:
 
       KEYCLOAK_HOST: "forum_keycloak"
       KEYCLOAK_PORT: "8080"
+      KEYCLOAK_URL: "forum_keycloak:8080,${KEYCLOAK_HOST}:${KEYCLOAK_PORT}"
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:-forum}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-frontend-app}
     depends_on:
