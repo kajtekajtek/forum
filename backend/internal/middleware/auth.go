@@ -111,6 +111,7 @@ func KeycloakAuth(cfg *config.Config) gin.HandlerFunc {
 */
 func ServerAuth(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// get user information from request's context
 		user, err := utils.GetUserInfo(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -118,7 +119,7 @@ func ServerAuth(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// get server ID from URL parameters
+		// get server ID from URL parameters and parse it
 		serverID, err := utils.ParseServerIDParam(c)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -127,13 +128,13 @@ func ServerAuth(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// check if user is a member of the server
-		ismember, err := database.IsUserMemberOfServer(db, user.ID, serverID)
+		isMember, err := database.IsUserMemberOfServer(db, user.ID, serverID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "membership check failed"})
 			return
 		}
-		if !ismember {
+		if !isMember {
 			c.JSON(http.StatusForbidden, gin.H{
 				"error": "not a member of this server"})
 			return
