@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kajtekajtek/forum/backend/internal/models"
 	"github.com/kajtekajtek/forum/backend/internal/database"
+	"github.com/kajtekajtek/forum/backend/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -15,7 +16,7 @@ type createServerRequest struct {
 
 func CreateServer(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, err := getUserInfo(c)
+		user, err := utils.GetUserInfo(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": err.Error()})
@@ -63,7 +64,7 @@ func CreateServer(db *gorm.DB) gin.HandlerFunc {
 
 func GetServerList(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, err := getUserInfo(c)
+		user, err := utils.GetUserInfo(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": err.Error()})

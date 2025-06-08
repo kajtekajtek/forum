@@ -1,4 +1,4 @@
-package handlers
+package utils
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 )
 
 /*
-	getUserInfo parses Gin context and returns information about user
+	GetUserInfo parses Gin context and returns information about the user
 */
-func getUserInfo(c *gin.Context) (models.UserInfo, error) {
+func GetUserInfo(c *gin.Context) (models.UserInfo, error) {
 	var user models.UserInfo
 
 	// get user ID
@@ -31,17 +31,18 @@ func getUserInfo(c *gin.Context) (models.UserInfo, error) {
 	return user, nil
 }
 
-// get server ID from URL parameters
-func parseServerIDParam(c *gin.Context) (uint, error) {
+/* 
+	ParseServerIDParam gets server ID from URL parameters and parses it to uint
+*/
+func ParseServerIDParam(c *gin.Context) (uint, error) {
 	serverIDParam := c.Param("serverID")
 
 	serverID64, err := strconv.ParseUint(serverIDParam, 10, 32)
 	if err != nil {
-		return 0, fmt.Errorf("parse server id: %w", err)
+		return 0, fmt.Errorf("parse server ID to uint: %w", err)
 	}
 
 	serverID := uint(serverID64)
 
 	return serverID, nil
 }
-

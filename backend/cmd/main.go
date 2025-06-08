@@ -33,7 +33,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	router.Use(middleware.KeycloakAuthMiddleware(config))
+	router.Use(middleware.KeycloakAuth(config))
 
 	servers := router.Group("/api/servers")
 	{
@@ -41,7 +41,7 @@ func main() {
         servers.POST("", handlers.CreateServer(db))
         servers.GET("", handlers.GetServerList(db))
 
-		server := router.Group("/:serverID")
+		server := router.Group("/:serverID", middleware.ServerAuth(db))
 		{
 			// api/servers/:serverID
 			server.POST("/channels", handlers.CreateChannel(db))

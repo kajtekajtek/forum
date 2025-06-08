@@ -8,6 +8,7 @@ import (
 
 	"github.com/kajtekajtek/forum/backend/internal/database"
 	"github.com/kajtekajtek/forum/backend/internal/models"
+	"github.com/kajtekajtek/forum/backend/internal/utils"
 )
 
 type createChannelRequest struct {
@@ -16,33 +17,14 @@ type createChannelRequest struct {
 
 func CreateChannel(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, err := getUserInfo(c)
-		if err != nil {
+		// get server's ID from request's context
+		serverIDAny, exists := c.Get("serverID")
+		if !exists {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": err.Error()})
+				"error": "server ID not fount in context"})
 			return
 		}
-
-		// get server ID from URL parameters
-		serverID, err := parseServerIDParam(c)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "invalid server ID"})
-			return
-		}
-
-		// check if user is a member of the server
-		ismember, err := database.IsUserMemberOfServer(db, user.ID, serverID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "membership check failed"})
-			return
-		}
-		if !ismember {
-			c.JSON(http.StatusForbidden, gin.H{
-				"error": "not a member of this server"})
-			return
-		}
+		serverID := serverIDAny.(uint)
 
 		// bind request JSON
 		var req createChannelRequest
@@ -70,20 +52,21 @@ func CreateChannel(db *gorm.DB) gin.HandlerFunc {
 
 func GetChannelList(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, err := getUserInfo(c)
+		// get user information and server ID from request's context
+		user, err := utils.GetUserInfo(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": err.Error()})
 			return
 		}
 
-		// get server ID from URL parameters
-		serverID, err := parseServerIDParam(c)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "invalid server ID"})
+		serverIDAny, exists := c.Get("serverID")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "server ID not fount in context"})
 			return
 		}
+		serverID := serverIDAny.(uint)
 
 		// check if user is a member of the server
 		isMember, err := database.IsUserMemberOfServer(db, user.ID, serverID)
