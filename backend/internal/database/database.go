@@ -76,3 +76,36 @@ func QueryUserServers(db *gorm.DB, userID string) ([]models.Server, error) {
 
 	return servers, nil
 }
+
+func QueryServerChannels(db *gorm.DB, serverID uint) ([]models.Channel, error) {
+	var channels []models.Channel
+
+	err := db.Where(models.Channel{ServerID: serverID}).Find(&channels).Error
+	if err != nil {
+		return nil, fmt.Errorf("query channels by server: %w", err)
+	}
+
+	return channels, nil
+}
+
+/* 
+	IsUserMemberOfServer finds first membership with given userID and serverID
+*/
+func IsUserMemberOfServer(db *gorm.DB, userID string, serverID uint) (bool, error) {
+	err := db.Where(
+		&models.Membership{UserID: userID, ServerID: serverID},
+	).First(
+		&models.Membership{},
+	).Error
+
+	// membership not found
+	if err == gorm.ErrRecordNotFound {
+		return false, nil
+	}
+	// error
+	if err != nil {
+		return false, fmt.Errorf("find user server membership: %w", err)
+	}
+
+	return true, nil
+}

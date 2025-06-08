@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"fmt"
-
 
 	"github.com/gin-gonic/gin"
 	"github.com/kajtekajtek/forum/backend/internal/models"
@@ -12,10 +10,10 @@ import (
 )
 
 type createServerRequest struct {
-	Name string `json:"name" binding:"required,min=1"`
+	Name string `json:"name" binding:"required,min=1,max=30"`
 }
 
-func CreateServerHandler(db *gorm.DB) gin.HandlerFunc {
+func CreateServer(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := getUserInfo(c)
 		if err != nil {
@@ -63,7 +61,7 @@ func CreateServerHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func GetServerListHandler(db *gorm.DB) gin.HandlerFunc {
+func GetServerList(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := getUserInfo(c)
 		if err != nil {
@@ -104,27 +102,4 @@ func GetServerListHandler(db *gorm.DB) gin.HandlerFunc {
 			"servers": servers,
 		})
 	}
-}
-
-/*
-	getUserInfo parses Gin context and returns information about user
-*/
-func getUserInfo(c *gin.Context) (models.UserInfo, error) {
-	var user models.UserInfo
-
-	// get user ID
-	userID, exists := c.Get("userID")
-	if !exists {
-		return models.UserInfo{}, fmt.Errorf("no user ID in context")
-	}
-	user.ID = userID.(string)
-
-	// get user's Realm roles
-	userRealmRoles, exists := c.Get("userRealmRoles")
-	if !exists {
-		return models.UserInfo{}, fmt.Errorf("no user Realm roles in context")
-	}
-	user.RealmRoles = userRealmRoles.([]string)
-
-	return user, nil
 }

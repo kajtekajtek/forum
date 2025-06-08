@@ -19,6 +19,9 @@ func main() {
 	}
 
 	db, err := database.Initialize(config)
+	if err != nil {
+		log.Fatalf("initialize database: %v", err)
+	}
 
 	router := gin.Default()
 
@@ -34,8 +37,16 @@ func main() {
 
 	servers := router.Group("/api/servers")
 	{
-        servers.POST("", handlers.CreateServerHandler(db))
-        servers.GET("", handlers.GetServerListHandler(db))
+		// api/servers
+        servers.POST("", handlers.CreateServer(db))
+        servers.GET("", handlers.GetServerList(db))
+
+		server := router.Group("/:serverID")
+		{
+			// api/servers/:serverID
+			server.POST("/channels", handlers.CreateChannel(db))
+			server.GET("/channels", handlers.GetChannelList(db))
+		}
 	}
 
 	router.Run(":" + config.APIPort)
