@@ -49,5 +49,16 @@ func main() {
 		}
 	}
 
+	channels := router.Group("/api/channels/")
+	{
+		// api/channels
+		channel := channels.Group("/:channelID", middleware.ChannelAuth(db))
+		{
+			// api/channels/:channelID
+			channel.GET("/messages", handlers.GetMessages(db))
+			channel.POST("/messages", handlers.CreateMessage(db))
+		}
+	}
+
 	router.Run(":" + config.APIPort)
 }

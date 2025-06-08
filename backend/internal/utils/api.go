@@ -32,17 +32,17 @@ func GetUserInfo(c *gin.Context) (models.UserInfo, error) {
 }
 
 /* 
-	ParseServerIDParam gets server ID from URL parameters and parses it to uint
+	ParseUintParam gets server ID from URL parameters and parses it to uint
 */
-func ParseServerIDParam(c *gin.Context) (uint, error) {
-	serverIDParam := c.Param("serverID")
+func ParseUintParam(c *gin.Context, key string) (uint, error) {
+	param := c.Param(key)
 
-	serverID64, err := strconv.ParseUint(serverIDParam, 10, 32)
+	param64, err := strconv.ParseUint(param, 10, 32)
 	if err != nil {
-		return 0, fmt.Errorf("parse server ID to uint: %w", err)
+		return 0, fmt.Errorf("parse %s to uint: %w", key, err)
 	}
 
-	serverID := uint(serverID64)
+	paramUint := uint(param64)
 
-	return serverID, nil
+	return paramUint, nil
 }

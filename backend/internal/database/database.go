@@ -88,6 +88,17 @@ func QueryServerChannels(db *gorm.DB, serverID uint) ([]models.Channel, error) {
 	return channels, nil
 }
 
+func QueryChannelMessages(db *gorm.DB, channelID uint) ([]models.Message, error) {
+	var messages []models.Message
+
+	err := db.Where(models.Message{ChannelID: channelID}).Find(&messages).Error
+	if err != nil {
+		return nil, fmt.Errorf("query messages by channel: %w", err)
+	}
+
+	return messages, nil
+}
+
 /* 
 	IsUserMemberOfServer finds first membership with given userID and serverID
 */
