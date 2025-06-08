@@ -27,7 +27,12 @@ func Initialize(c *config.Config) (*gorm.DB, error) {
 	}
 
 	// run auto migration for application's models
-	err = db.AutoMigrate(&models.Server{}, &models.Membership{}); 
+	err = db.AutoMigrate(
+		&models.Server{}, 
+		&models.Membership{},
+		&models.Channel{},
+		&models.Message{},
+	); 
 	if err != nil {
 		return &gorm.DB{}, fmt.Errorf("auto migrate: %w", err)
 	}
