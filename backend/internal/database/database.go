@@ -13,11 +13,11 @@ import (
 func Initialize(c *config.Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		c.DBHost,
-		c.DBPort,
-		c.DBUser,
-		c.DBPassword,
-		c.DBName,
+		c.PostgresHost,
+		c.PostgresPort,
+		c.PostgresUser,
+		c.PostgresPassword,
+		c.PostgresDB,
 	)
 	
 	// initialize database session

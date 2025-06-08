@@ -2,26 +2,30 @@ package config
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
+	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
 	// server variables
-	Port	string
+	APIPort	string
 
 	// database variables
-	DBHost		string
-	DBPort		string
-	DBUser		string
-	DBPassword	string
-	DBName		string
+	PostgresHost		string
+	PostgresPort		string
+	PostgresUser		string
+	PostgresPassword	string
+	PostgresDB			string
 
 	// keycloak variables
-	KeycloakHost		string
-	KeycloakPort		string
+	KeycloakURLs		[]string
 	KeycloakRealm		string
 	KeycloakClientID	string
+
+	// CORS
+	CORSOrigins			[]string
 }
 
 func Load() (*Config, error) {
@@ -29,21 +33,24 @@ func Load() (*Config, error) {
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		return &Config{}, fmt.Errorf("load .env: %w", err)
+		fmt.Println("warning: .env not found.")
 	}
 
-	c.Port	= os.Getenv("PORT")
+	c.APIPort = os.Getenv("API_PORT")
 
-	c.DBHost 		= os.Getenv("DB_HOST")
-	c.DBPort 		= os.Getenv("DB_PORT")
-	c.DBUser 		= os.Getenv("DB_USER")
-	c.DBPassword 	= os.Getenv("DB_PASSWORD")
-	c.DBName 		= os.Getenv("DB_NAME")
+	c.PostgresHost 		= os.Getenv("POSTGRES_HOST")
+	c.PostgresPort 		= os.Getenv("POSTGRES_PORT")
+	c.PostgresUser 		= os.Getenv("POSTGRES_USER")
+	c.PostgresPassword 	= os.Getenv("POSTGRES_PASSWORD")
+	c.PostgresDB 		= os.Getenv("POSTGRES_DB")
 
-	c.KeycloakHost		= os.Getenv("KEYCLOAK_HOST")
-	c.KeycloakPort		= os.Getenv("KEYCLOAK_PORT")
-	c.KeycloakRealm		= os.Getenv("KEYCLOAK_REALM")
-	c.KeycloakClientID	= os.Getenv("KEYCLOAK_CLIENT_ID")
+	keycloakURLs      := os.Getenv("KEYCLOAK_URL")
+	c.KeycloakURLs     = strings.Split(keycloakURLs, ",")
+	c.KeycloakRealm	   = os.Getenv("KEYCLOAK_REALM")
+	c.KeycloakClientID = os.Getenv("KEYCLOAK_CLIENT_ID")
+
+	corsOrigins  := os.Getenv("CORS_ORIGINS")
+	c.CORSOrigins = strings.Split(corsOrigins, ",")
 
 	return &c, nil
 }

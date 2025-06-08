@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+if (!process.env.NEXT_PUBLIC_API_URL) {
+  throw new Error("Missing API configuration in environment variables.");
+}
+
 const apiClient = axios.create({
-    baseURL: process.env.BACKEND_URL || 'http://localhost:8080/api',
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
     timeout: 10000,
 });
 

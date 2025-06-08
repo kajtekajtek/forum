@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 
 	"github.com/kajtekajtek/forum/backend/internal/config"
 	"github.com/kajtekajtek/forum/backend/internal/middleware"
@@ -21,6 +22,14 @@ func main() {
 
 	router := gin.Default()
 
+	// CORS
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: config.CORSOrigins,
+		AllowMethods: []string{"GET", "POST", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Authorization", "Content-Type"},
+		AllowCredentials: true,
+	}))
+
 	router.Use(middleware.KeycloakAuthMiddleware(config))
 
 	servers := router.Group("/api/servers")
@@ -29,5 +38,5 @@ func main() {
         servers.GET("", handlers.GetServerListHandler(db))
 	}
 
-	router.Run(":" + config.Port)
+	router.Run(":" + config.APIPort)
 }

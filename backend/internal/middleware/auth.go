@@ -14,14 +14,17 @@ import (
 
 func KeycloakAuthMiddleware(cfg *config.Config) gin.HandlerFunc {
 	// token issuer's URL (keycloak's realm adress)
-	issuer := fmt.Sprintf("http://%s:%s/realms/%s", 
-		cfg.KeycloakHost, 
-		cfg.KeycloakPort, 
-		cfg.KeycloakRealm,
-	)
+	issuerURLs := make([]string, 0, len(cfg.KeycloakURLs))
+	for _, url := range cfg.KeycloakURLs {
+		issuerURL := fmt.Sprintf("http://%s/realms/%s",
+			url,
+			cfg.KeycloakRealm,
+		)
+		issuerURLs = append(issuerURLs, issuerURL)
+	}
 
 	// OpenID Connect provider
-	provider, err := oidc.NewProvider(context.Background(), issuer)
+	provider, err := oidc.NewProvider(context.Background(), issuerURLs[0])
 	if err != nil {
 		panic(fmt.Sprintf("get provider: %v", err))
 	}
@@ -31,10 +34,14 @@ func KeycloakAuthMiddleware(cfg *config.Config) gin.HandlerFunc {
 		- since we are using ID Token Verifier to verify Access Tokens, 
 		  keycloak's Realm should have protocol mapper configured to incldude
 		  clientID in it's Access Tokens
+		- we are skipping issuer check to enable multiple issuer's URLs
 		- https://oauth.net/id-tokens-vs-access-tokens/
 		- https://pkg.go.dev/github.com/coreos/go-oidc@v2.3.0+incompatible
 	*/
-	verifier := provider.Verifier(&oidc.Config{ClientID: cfg.KeycloakClientID})
+	verifier := provider.Verifier(&oidc.Config{
+		ClientID: cfg.KeycloakClientID, 
+		SkipIssuerCheck: true,
+	})
 
 	return func(c *gin.Context) {
 		// retrieve token from Authorization header
@@ -56,6 +63,19 @@ func KeycloakAuthMiddleware(cfg *config.Config) gin.HandlerFunc {
 		// verify token
 		accessToken, err := verifier.Verify(context.Background(), rawToken)
 		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "invalid token"})
+			return
+		}
+
+		verifiedIssuer := false
+		for _, i := range issuerURLs {
+			if accessToken.Issuer == i {
+				verifiedIssuer = true
+				break
+			}
+		}
+		if !verifiedIssuer {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "invalid token"})
 			return
