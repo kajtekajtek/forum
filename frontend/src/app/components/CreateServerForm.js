@@ -54,7 +54,6 @@ export default function CreateServerForm() {
                                 name="name"
                                 type="text"
                                 className="form-control"
-                                placeholder="Server Name"
                                 disabled={isSubmitting}
                             />
                             <ErrorMessage 

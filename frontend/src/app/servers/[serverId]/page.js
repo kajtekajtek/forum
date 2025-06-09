@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useKeycloak } from "../../context/KeycloakContext";
+import { useUser } from "../../context/UserContext";
 import { fetchServerChannels } from "../../../lib/api/apiClient";
 import ChannelList from "../../components/ChannelList";
 import CreateChannelForm from "../../components/CreateChannelForm";
@@ -9,6 +10,7 @@ import CreateChannelForm from "../../components/CreateChannelForm";
 export default function ServerPage({ params }) {
     const { serverId } = params;
     const { keycloak, authenticated } = useKeycloak();
+    const { servers, loading: serverLoading, error: serverError } = useUser();
 
     const [channels, setChannels] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -38,6 +40,8 @@ export default function ServerPage({ params }) {
     const onChannelCreation = () => {
         loadChannels();
     };
+
+    if (!servers.some((s) => s.id == serverId)) return null;
 
     if (!authenticated) return null;
 

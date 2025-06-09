@@ -70,7 +70,6 @@ export default function ChannelChat({ serverId, channelId }) {
                     className="form-control"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type a message..."
                 />
                 <button className="btn btn-primary" type="submit">
                     Send

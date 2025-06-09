@@ -50,7 +50,6 @@ export default function CreateChannelForm({ serverId, onCreated }) {
                                 name="name"
                                 type="text"
                                 className="form-control"
-                                placeholder="Channel Name"
                                 disabled={isSubmitting}
                             />
                             <ErrorMessage name="name" component="div" className="text-danger small" />
