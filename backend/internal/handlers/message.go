@@ -37,14 +37,14 @@ func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		channelIDAny, exists := c.Get("serverID")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "channel ID not found in context"})
+		// get channel ID from URL parameters and parse it
+		channelID, err := utils.ParseUintParam(c, "channelID")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "invalid channel ID"})
 			return
 		}
-		channelID := channelIDAny.(uint)
-
+	
 		// bind request JSON
 		var req createMessageRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -72,14 +72,13 @@ func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 
 func GetMessages(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// get server ID from request's context
-		channelIDAny, exists := c.Get("channelID")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "channel ID not found in context"})
+		// get channel ID from URL parameters and parse it
+		channelID, err := utils.ParseUintParam(c, "channelID")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "invalid channel ID"})
 			return
 		}
-		channelID := channelIDAny.(uint)
 
 		// get messages by server
 		messages, err := database.QueryChannelMessages(db, channelID)

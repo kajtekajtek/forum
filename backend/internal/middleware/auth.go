@@ -12,7 +12,6 @@ import (
 
 	"github.com/kajtekajtek/forum/backend/internal/config"
 	"github.com/kajtekajtek/forum/backend/internal/database"
-	"github.com/kajtekajtek/forum/backend/internal/models"
 	"github.com/kajtekajtek/forum/backend/internal/utils"
 )
 
@@ -143,61 +142,6 @@ func ServerAuth(db *gorm.DB) gin.HandlerFunc {
 
 		// set request's server ID in the Gin context
 		c.Set("serverID", serverID)
-
-		c.Next()
-	}
-}
-
-/*
-	ChannelAuth gets server ID from URL parameters and checks if user is a member of the server
-*/
-func ChannelAuth(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// get user information from request's context
-		user, err := utils.GetUserInfo(c)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": err.Error()})
-			return
-		}
-
-		// get channel ID from URL parameters and parse it
-		channelID, err := utils.ParseUintParam(c, "channelID")
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "invalid channel ID"})
-			return
-		}
-
-		// get channel's server
-		var server models.Server
-		err = db.Where(&models.Channel{ID: channelID}).First(&server).Error
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "channel not found"})
-			return
-		}
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "query channel error"})
-		}
-
-		// check if user is a member of the server
-		isMember, err := database.IsUserMemberOfServer(db, user.ID, server.ID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "membership check failed"})
-			return
-		}
-		if !isMember {
-			c.JSON(http.StatusForbidden, gin.H{
-				"error": "not a member of this server"})
-			return
-		}
-
-		// set request's server ID in the Gin context
-		c.Set("serverID", server.ID)
-		c.Set("channelID", channelID)
 
 		c.Next()
 	}

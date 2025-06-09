@@ -44,19 +44,19 @@ func main() {
 		server := router.Group("/:serverID", middleware.ServerAuth(db))
 		{
 			// api/servers/:serverID
-			server.POST("/channels", handlers.CreateChannel(db))
-			server.GET("/channels", handlers.GetChannelList(db))
-		}
-	}
+			channels := server.Group("/channels")
+			{
+				// api/servers/:serverID/channels
+				channels.POST("", handlers.CreateChannel(db))
+				channels.GET("", handlers.GetChannelList(db))
 
-	channels := router.Group("/api/channels/")
-	{
-		// api/channels
-		channel := channels.Group("/:channelID", middleware.ChannelAuth(db))
-		{
-			// api/channels/:channelID
-			channel.GET("/messages", handlers.GetMessages(db))
-			channel.POST("/messages", handlers.CreateMessage(db))
+				channel := channels.Group("/:channelID")
+				{
+					// api/servers/:serverID/channels/:channelID
+					channel.GET("/messages", handlers.GetMessages(db))
+					channel.POST("/messages", handlers.CreateMessage(db))
+				}
+			}
 		}
 	}
 
