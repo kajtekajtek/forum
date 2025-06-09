@@ -27,7 +27,12 @@ func Initialize(c *config.Config) (*gorm.DB, error) {
 	}
 
 	// run auto migration for application's models
-	err = db.AutoMigrate(&models.Server{}, &models.Membership{}); 
+	err = db.AutoMigrate(
+		&models.Server{}, 
+		&models.Membership{},
+		&models.Channel{},
+		&models.Message{},
+	); 
 	if err != nil {
 		return &gorm.DB{}, fmt.Errorf("auto migrate: %w", err)
 	}
@@ -70,4 +75,48 @@ func QueryUserServers(db *gorm.DB, userID string) ([]models.Server, error) {
 	}
 
 	return servers, nil
+}
+
+func QueryServerChannels(db *gorm.DB, serverID uint) ([]models.Channel, error) {
+	var channels []models.Channel
+
+	err := db.Where(models.Channel{ServerID: serverID}).Find(&channels).Error
+	if err != nil {
+		return nil, fmt.Errorf("query channels by server: %w", err)
+	}
+
+	return channels, nil
+}
+
+func QueryChannelMessages(db *gorm.DB, channelID uint) ([]models.Message, error) {
+	var messages []models.Message
+
+	err := db.Where(models.Message{ChannelID: channelID}).Find(&messages).Error
+	if err != nil {
+		return nil, fmt.Errorf("query messages by channel: %w", err)
+	}
+
+	return messages, nil
+}
+
+/* 
+	IsUserMemberOfServer finds first membership with given userID and serverID
+*/
+func IsUserMemberOfServer(db *gorm.DB, userID string, serverID uint) (bool, error) {
+	err := db.Where(
+		&models.Membership{UserID: userID, ServerID: serverID},
+	).First(
+		&models.Membership{},
+	).Error
+
+	// membership not found
+	if err == gorm.ErrRecordNotFound {
+		return false, nil
+	}
+	// error
+	if err != nil {
+		return false, fmt.Errorf("find user server membership: %w", err)
+	}
+
+	return true, nil
 }

@@ -2,22 +2,22 @@ package handlers
 
 import (
 	"net/http"
-	"fmt"
-
+	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kajtekajtek/forum/backend/internal/models"
 	"github.com/kajtekajtek/forum/backend/internal/database"
+	"github.com/kajtekajtek/forum/backend/internal/utils"
 	"gorm.io/gorm"
 )
 
 type createServerRequest struct {
-	Name string `json:"name" binding:"required,min=1"`
+	Name string `json:"name" binding:"required,min=1,max=30"`
 }
 
-func CreateServerHandler(db *gorm.DB) gin.HandlerFunc {
+func CreateServer(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, err := getUserInfo(c)
+		user, err := utils.GetUserInfo(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": err.Error()})
@@ -63,26 +63,22 @@ func CreateServerHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func GetServerListHandler(db *gorm.DB) gin.HandlerFunc {
+func GetServerList(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, err := getUserInfo(c)
+		user, err := utils.GetUserInfo(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": err.Error()})
 			return
 		}
 
-		isAdminOrMod := false
-		for _, r := range user.RealmRoles {
-			if r == "admin" || r == "moderator" {
-				isAdminOrMod = true
-			}
-		}
+		isAdmin := slices.Contains(user.RealmRoles, "admin")
+		isMod := slices.Contains(user.RealmRoles, "moderator")
 		
 		var servers []models.Server
 
 		// if user has role admin or moderator, return all servers
-		if isAdminOrMod {
+		if isAdmin || isMod {
 			servers, err = database.QueryAllServers(db)	
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
@@ -104,27 +100,4 @@ func GetServerListHandler(db *gorm.DB) gin.HandlerFunc {
 			"servers": servers,
 		})
 	}
-}
-
-/*
-	getUserInfo parses Gin context and returns information about user
-*/
-func getUserInfo(c *gin.Context) (models.UserInfo, error) {
-	var user models.UserInfo
-
-	// get user ID
-	userID, exists := c.Get("userID")
-	if !exists {
-		return models.UserInfo{}, fmt.Errorf("no user ID in context")
-	}
-	user.ID = userID.(string)
-
-	// get user's Realm roles
-	userRealmRoles, exists := c.Get("userRealmRoles")
-	if !exists {
-		return models.UserInfo{}, fmt.Errorf("no user Realm roles in context")
-	}
-	user.RealmRoles = userRealmRoles.([]string)
-
-	return user, nil
 }

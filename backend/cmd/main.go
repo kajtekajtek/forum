@@ -10,6 +10,7 @@ import (
 	"github.com/kajtekajtek/forum/backend/internal/middleware"
 	"github.com/kajtekajtek/forum/backend/internal/handlers"
 	"github.com/kajtekajtek/forum/backend/internal/database"
+	"github.com/kajtekajtek/forum/backend/internal/sse"
 )
 
 func main() {
@@ -19,6 +20,11 @@ func main() {
 	}
 
 	db, err := database.Initialize(config)
+	if err != nil {
+		log.Fatalf("initialize database: %v", err)
+	}
+
+	sseManager := sse.NewManager()
 
 	router := gin.Default()
 
@@ -30,12 +36,32 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	router.Use(middleware.KeycloakAuthMiddleware(config))
+	router.Use(middleware.KeycloakAuth(config))
 
 	servers := router.Group("/api/servers")
 	{
-        servers.POST("", handlers.CreateServerHandler(db))
-        servers.GET("", handlers.GetServerListHandler(db))
+		// api/servers
+        servers.POST("", handlers.CreateServer(db))
+        servers.GET("", handlers.GetServerList(db))
+
+		server := servers.Group("/:serverID", middleware.ServerAuth(db))
+		{
+			// api/servers/:serverID
+			channels := server.Group("/channels")
+			{
+				// api/servers/:serverID/channels
+				channels.POST("", handlers.CreateChannel(db))
+				channels.GET("", handlers.GetChannelList(db))
+
+				channel := channels.Group("/:channelID")
+				{
+					// api/servers/:serverID/channels/:channelID
+					channel.GET("/messages", handlers.GetMessages(db))
+					channel.POST("/messages", handlers.CreateMessage(db, sseManager))
+					channel.GET("/stream", handlers.StreamMessages(sseManager))
+				}
+			}
+		}
 	}
 
 	router.Run(":" + config.APIPort)

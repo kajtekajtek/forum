@@ -11,7 +11,7 @@ export default function CreateServerForm() {
     const { createServer, isCreating, createError } = useUser();
 
     const servNameMin= 3;
-    const servNameMax= 20;
+    const servNameMax= 30;
 
     const createServerSchema = Yup.object().shape({
         name: Yup.string()
@@ -54,7 +54,6 @@ export default function CreateServerForm() {
                                 name="name"
                                 type="text"
                                 className="form-control"
-                                placeholder="Server Name"
                                 disabled={isSubmitting}
                             />
                             <ErrorMessage 

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 if (!process.env.NEXT_PUBLIC_API_URL) {
   throw new Error("Missing API configuration in environment variables.");
@@ -18,16 +18,14 @@ apiClient.interceptors.request.use((config) => {
     returns { server, membership } object
 */
 export const createServer = async (token, name) => {
-    const response = await apiClient.post(
-        '/servers',
+    const response = await apiClient.post('/servers',
         { name },
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        }
+        { headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },}
     );
+
     return response.data;
 };
 
@@ -36,15 +34,79 @@ export const createServer = async (token, name) => {
     returns array of servers
 */
 export const fetchServers = async (token) => {
+    const response = await apiClient.get('/servers',
+        { headers: { Authorization: `Bearer ${token}` }}
+    );
+
+    return response.data.servers;
+};
+
+/*
+    fetch server's channels
+    returns array of channels
+*/
+export const fetchServerChannels = async (token, serverId) => {
+    const response = await apiClient.get(`/servers/${serverId}/channels`,
+        { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    return response.data.channels;
+};
+
+/*
+    create channel in a server
+    returns created channel
+*/
+export const createChannel = async (token, serverId, name) => {
+    const response = await apiClient.post(
+        `/servers/${serverId}/channels`,
+        { name },
+        { headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        }}
+    );
+
+    return response.data.channel;
+};
+
+/*
+    fetch messages from a channel
+    returns array of messages
+*/
+export const fetchChannelMessages = async (token, serverId, channelId) => {
     const response = await apiClient.get(
-        '/servers',
+        `/servers/${serverId}/channels/${channelId}/messages`,
         {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
-        }
+        },
     );
-    return response.data.servers;
+
+    return response.data.messages;
+};
+
+/*
+    send a message to a channel
+    returns created message
+*/
+export const sendChannelMessage = async (
+    token,
+    serverId,
+    channelId,
+    content,
+) => {
+    const response = await apiClient.post(
+        `/servers/${serverId}/channels/${channelId}/messages`,
+        { content },
+        { headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        }}
+    );
+
+    return response.data.message;
 };
 
 export default apiClient;

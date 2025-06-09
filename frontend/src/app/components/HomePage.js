@@ -14,9 +14,6 @@ export default function Home() {
     return (
         <div>
             <h1>hello, {userInfo?.preferred_username}!</h1> 
-            <p>{userInfo.sub}</p>
-            <p>{userInfo.email_verified}</p>
-            <p>{userInfo.preferred_username}</p>
         </div>
     );
 };
