@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kajtekajtek/forum/backend/internal/models"
@@ -71,17 +72,13 @@ func GetServerList(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		isAdminOrMod := false
-		for _, r := range user.RealmRoles {
-			if r == "admin" || r == "moderator" {
-				isAdminOrMod = true
-			}
-		}
+		isAdmin := slices.Contains(user.RealmRoles, "admin")
+		isMod := slices.Contains(user.RealmRoles, "moderator")
 		
 		var servers []models.Server
 
 		// if user has role admin or moderator, return all servers
-		if isAdminOrMod {
+		if isAdmin || isMod {
 			servers, err = database.QueryAllServers(db)	
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{

@@ -44,7 +44,7 @@ func main() {
         servers.POST("", handlers.CreateServer(db))
         servers.GET("", handlers.GetServerList(db))
 
-		server := router.Group("/:serverID", middleware.ServerAuth(db))
+		server := servers.Group("/:serverID", middleware.ServerAuth(db))
 		{
 			// api/servers/:serverID
 			channels := server.Group("/channels")

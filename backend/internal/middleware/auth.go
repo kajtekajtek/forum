@@ -128,17 +128,23 @@ func ServerAuth(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// check if user is a member of the server
-		isMember, err := database.IsUserMemberOfServer(db, user.ID, serverID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "membership check failed"})
-			return
-		}
-		if !isMember {
-			c.JSON(http.StatusForbidden, gin.H{
-				"error": "not a member of this server"})
-			return
+		// check if user is an admin or moderator
+		isAdmin := slices.Contains(user.RealmRoles, "admin")
+		isMod := slices.Contains(user.RealmRoles, "moderator")
+
+		// if regular user, check if user is a member of the server
+		if !isAdmin && !isMod {
+			isMember, err := database.IsUserMemberOfServer(db, user.ID, serverID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "membership check failed"})
+				return
+			}
+			if !isMember {
+				c.JSON(http.StatusForbidden, gin.H{
+					"error": "not a member of this server"})
+				return
+			}
 		}
 
 		// set request's server ID in the Gin context
