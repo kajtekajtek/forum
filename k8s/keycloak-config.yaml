@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-config
+data:
+  start.sh: |
+    #!/bin/bash
+    set -e
+    
+    echo "=== Starting keycloak... ==="
+    exec /opt/keycloak/bin/kc.sh --import-realm
+  realm-export.json: |
+    {
+        "realm": "\${KEYCLOAK_REALM:-forum}",
+        "enabled": true,
+        "registrationAllowed": true,
+        "clients": [
+            {
+                "clientId": "\${KEYCLOAK_CLIENT_ID:-frontend-app}",
+                "publicClient": true,
+                "redirectUris": ["http://localhost:3000/*"],
+                "webOrigins": ["+"],
+                "protocol": "openid-connect",
+                "standardFlowEnabled": true,
+                "implicitFlowEnabled": false,
+                "directAccessGrantsEnabled": true,
+                "attributes": {
+                    "pkce.code.challenge.method": "S256",
+                    "post.logout.redirect.uris": "+"
+                },
+                "protocolMappers": [
+                    {          
+                        "name": "aud-mapper",
+                        "protocol": "openid-connect",
+                        "protocolMapper": "oidc-audience-mapper",
+                        "consentRequired": false,
+                        "consentText": "",
+                        "config": {
+                            "included.client.audience": "\${KEYCLOAK_CLIENT_ID:-frontend-app}",
+                            "id.token.claim": "true",
+                            "access.token.claim": "true",
+                            "claim.name": "aud",
+                            "jsonType.label": "String"
+                        }
+                    }
+                ]
+            }
+        ],
+        "roles": {
+            "realm": [
+                { "name": "admin" },
+                { "name": "moderator" },
+                { "name": "user" }
+            ]
+        },
+        "users": [
+            {
+                "username": "admin",
+                "enabled": true,
+                "credentials": [
+                    {
+                        "type": "password",
+                        "value": "admin",
+                        "temporary": false
+                    }
+                ],
+                "realmRoles": ["admin"]
+            },
+            {
+                "username": "moderator",
+                "enabled": true,
+                "credentials": [
+                    {
+                        "type": "password",
+                        "value": "moderator",
+                        "temporary": false
+                    }
+                ],
+                "realmRoles": ["moderator"]
+            },
+            {
+                "username": "user",
+                "enabled": true,
+                "credentials": [
+                    {
+                        "type": "password",
+                        "value": "user",
+                        "temporary": false
+                    }
+                ],
+                "realmRoles": ["user"]
+            }
+        ]
+    }
