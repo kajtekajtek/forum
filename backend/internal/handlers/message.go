@@ -9,25 +9,14 @@ import (
 	"github.com/kajtekajtek/forum/backend/internal/database"
 	"github.com/kajtekajtek/forum/backend/internal/models"
 	"github.com/kajtekajtek/forum/backend/internal/utils"
+	"github.com/kajtekajtek/forum/backend/internal/sse"
 )
 
 type createMessageRequest struct {
 	Content string `json:"content" binding:"required,min=1,max=500"`
 }
 
-/*
-type Message struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	ChannelID uint      `gorm:"not null;index" json:"channelId"`
-	UserID    string    `gorm:"type:text;not null;index" json:"userId"`
-	Content   string    `gorm:"type:text;not null" json:"content"`
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
-	// relation
-	Channel   *Channel  `gorm:"foreignKey:ChannelID" json:"-"`
-}
-*/
-
-func CreateMessage(db *gorm.DB) gin.HandlerFunc {
+func CreateMessage(db *gorm.DB, manager *sse.Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// get user info & server ID from request context
 		user, err := utils.GetUserInfo(c)
@@ -44,7 +33,7 @@ func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 				"error": "invalid channel ID"})
 			return
 		}
-	
+
 		// bind request JSON
 		var req createMessageRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -54,10 +43,10 @@ func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// create Message record
-		message := models.Message {
+		message := models.Message{
 			ChannelID: channelID,
-			UserID: user.ID,
-			Content: req.Content,
+			UserID:    user.ID,
+			Content:   req.Content,
 		}
 
 		if err := db.Create(&message).Error; err != nil {
@@ -65,6 +54,9 @@ func CreateMessage(db *gorm.DB) gin.HandlerFunc {
 				"error": "failed to create message"})
 			return
 		}
+
+		// publish the message to channel's subscribers
+		manager.Publish(channelID, message)
 
 		c.JSON(http.StatusCreated, gin.H{"message": message})
 	}

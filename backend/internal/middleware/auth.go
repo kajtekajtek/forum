@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/coreos/go-oidc"
@@ -32,9 +33,9 @@ func KeycloakAuth(cfg *config.Config) gin.HandlerFunc {
 		panic(fmt.Sprintf("get provider: %v", err))
 	}
 
-	/* 
+	/*
 		token verifier initialization
-		- since we are using ID Token Verifier to verify Access Tokens, 
+		- since we are using ID Token Verifier to verify Access Tokens,
 		  keycloak's Realm should have protocol mapper configured to incldude
 		  clientID in it's Access Tokens
 		- we are skipping issuer check to enable multiple issuer's URLs
@@ -42,13 +43,19 @@ func KeycloakAuth(cfg *config.Config) gin.HandlerFunc {
 		- https://pkg.go.dev/github.com/coreos/go-oidc@v2.3.0+incompatible
 	*/
 	verifier := provider.Verifier(&oidc.Config{
-		ClientID: cfg.KeycloakClientID, 
+		ClientID:        cfg.KeycloakClientID, 
 		SkipIssuerCheck: true,
 	})
 
 	return func(c *gin.Context) {
-		// retrieve token from Authorization header
+		// retrieve token from Authorization header or query parameter
 		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			tokenQuery := c.Query("token")
+			if tokenQuery != "" {
+				authHeader = "Bearer " + tokenQuery
+			}
+		}
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "no token"})
@@ -71,13 +78,7 @@ func KeycloakAuth(cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		verifiedIssuer := false
-		for _, i := range issuerURLs {
-			if accessToken.Issuer == i {
-				verifiedIssuer = true
-				break
-			}
-		}
+		verifiedIssuer := slices.Contains(issuerURLs, accessToken.Issuer)
 		if !verifiedIssuer {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "invalid token"})
@@ -86,7 +87,7 @@ func KeycloakAuth(cfg *config.Config) gin.HandlerFunc {
 
 		// read "sub" (userID) and Realm roles from claims
 		var claims struct {
-			Sub	        string   `json:"sub"`
+			Sub	        string `json:"sub"`
 			RealmAccess struct {
 				Roles []string `json:"roles"`
 			} `json:"realm_access"`

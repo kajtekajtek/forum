@@ -10,6 +10,7 @@ import (
 	"github.com/kajtekajtek/forum/backend/internal/middleware"
 	"github.com/kajtekajtek/forum/backend/internal/handlers"
 	"github.com/kajtekajtek/forum/backend/internal/database"
+	"github.com/kajtekajtek/forum/backend/internal/sse"
 )
 
 func main() {
@@ -22,6 +23,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("initialize database: %v", err)
 	}
+
+	sseManager := sse.NewManager()
 
 	router := gin.Default()
 
@@ -54,7 +57,8 @@ func main() {
 				{
 					// api/servers/:serverID/channels/:channelID
 					channel.GET("/messages", handlers.GetMessages(db))
-					channel.POST("/messages", handlers.CreateMessage(db))
+					channel.POST("/messages", handlers.CreateMessage(db, sseManager))
+					channel.GET("/stream", handlers.StreamMessages(sseManager))
 				}
 			}
 		}
