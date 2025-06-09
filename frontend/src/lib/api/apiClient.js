@@ -42,6 +42,35 @@ export const fetchServers = async (token) => {
 };
 
 /*
+    fetch server's channels
+    returns array of channels
+*/
+export const fetchServerChannels = async (token, serverId) => {
+    const response = await apiClient.get(`/servers/${serverId}/channels`,
+        { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    return response.data.channels;
+};
+
+/*
+    create channel in a server
+    returns created channel
+*/
+export const createChannel = async (token, serverId, name) => {
+    const response = await apiClient.post(
+        `/servers/${serverId}/channels`,
+        { name },
+        { headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        }}
+    );
+
+    return response.data.channel;
+};
+
+/*
     fetch messages from a channel
     returns array of messages
 */
