@@ -1,19 +1,9 @@
-// app/components/ServerList.js - server list component
 "use client";
 
 import React from "react";
 import Link from "next/link";
-import { useKeycloak } from '../context/KeycloakContext';
-import { useUser } from '../context/UserContext';
 
-export default function ServerList() {
-    const { authenticated} = useKeycloak();
-    const { servers, loading, error } = useUser();
-
-    if (!authenticated) {
-        return;
-    }
-
+export default function ChannelList({ serverId, channels, loading, error }) {
     if (loading) {
         return (
             <div className="d-flex justify-content-center my-4">
@@ -32,29 +22,29 @@ export default function ServerList() {
         );
     }
 
-    if (!servers) {
-        return (
-            <div className="alert alert-info my-3" role="alert">
-                Your server list is empty. Join a server or create one.
-            </div>
-        );
+    if (!channels || channels.length === 0) {
+        <div className="alert alert-info my-3" role="alert">
+            No channels found.
+        </div>
     }
 
     return (
         <ul className="list-group mb-4">
-            {servers.map((s) => (
+            {channels.map((c) => (
                 <li
+                    key={c.id}
                     className="list-group-item d-flex justify-content-between align-items-center"
-                    key={s.id}
                 >
-                    <Link href={`/servers/${s.id}`} className="me-auto text-decoration-none">
-                        {s.name}
+                    <Link
+                        href={`/servers/${serverId}/channels/${c.id}`}
+                        className="me-auto text-decoration-none">
+                        {c.name}
                     </Link>
                     <small className="text-muted">
-                        {new Date(s.createdAt).toLocaleString()}
+                        {new Date(c.createdAt).toLocaleString()}
                     </small>
                 </li>
             ))}
         </ul>
-    )
+    );
 }
