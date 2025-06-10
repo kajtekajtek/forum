@@ -37,8 +37,7 @@ services:
     volumes:
       - forum_keycloak_volume:/opt/keycloak/data
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
-      - ./keycloak/start.sh:/opt/keycloak/start.sh
-    entrypoint: ["/opt/keycloak/start.sh"]
+    entrypoint: ["/opt/keycloak/bin/kc.sh"]
     healthcheck:
       test:
         [
@@ -75,7 +74,7 @@ services:
 
       KEYCLOAK_HOST: "forum_keycloak"
       KEYCLOAK_PORT: "8080"
-      KEYCLOAK_URL: "forum_keycloak:8080,${KEYCLOAK_HOST}:${KEYCLOAK_PORT}"
+      KEYCLOAK_URL: "forum_keycloak:8080,${KEYCLOAK_HOST:-localhost}:${KEYCLOAK_PORT:-5000}"
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:-forum}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-frontend-app}
     depends_on:
@@ -91,10 +90,10 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
       args:
-        KEYCLOAK_URL: "${KEYCLOAK_URL}"
+        KEYCLOAK_URL: "${KEYCLOAK_URL:-http://localhost:5000}"
         KEYCLOAK_REALM: ${KEYCLOAK_REALM:-forum}
         KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-frontend-app}
-        API_URL: "${API_URL}"
+        API_URL: "${API_URL:-http://localhost:8080/api}"
     container_name: forum_frontend_container
     restart: always
     ports:
