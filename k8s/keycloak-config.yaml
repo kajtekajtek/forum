@@ -8,7 +8,7 @@ data:
     set -e
     
     echo "=== Starting keycloak... ==="
-    exec /opt/keycloak/bin/kc.sh --import-realm
+    exec /opt/keycloak/bin/kc.sh $@
   realm-export.json: |
     {
         "realm": "\${KEYCLOAK_REALM:-forum}",
